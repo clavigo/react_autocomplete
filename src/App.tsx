@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import './App.scss';
 import { peopleFromServer } from './data/people';
 import { Person } from './types/Person';
@@ -12,21 +12,18 @@ export const App: React.FC = () => {
   const [selectedPerson, setSelectedPerson] = React.useState<Person | null>(
     null,
   );
+  const delay = 300;
 
   const filteredPeople = peopleFromServer.filter(person =>
     person.name.toLowerCase().includes(appliedQuery.toLowerCase()),
   );
 
-  const debouncedApplyQuery = useMemo(
-    () => debounce((querys: string) => setAppliedQuery(querys), 1000),
-    [setAppliedQuery], // Додаємо залежності для debounce
-  );
-
-  const applyQuery = useCallback(
-    (querys: string) => {
-      debouncedApplyQuery(querys);
-    },
-    [debouncedApplyQuery],
+  const applyQuery = useMemo(
+    () =>
+      debounce((currentQuery: string) => {
+        setAppliedQuery(currentQuery);
+      }, delay),
+    [setAppliedQuery],
   );
 
   React.useEffect(() => {
@@ -70,21 +67,21 @@ export const App: React.FC = () => {
               value={query}
               onChange={handleQueryChange}
               onFocus={() => setIsActive(true)}
-              // onBlur={() => setIsActive(false)}
+              onBlur={() => setIsActive(false)}
             />
           </div>
 
           <div className="dropdown-menu" role="menu" data-cy="suggestions-list">
             <div className="dropdown-content">
-              {filteredPeople.map((person: Person, index: number) => (
+              {filteredPeople.map((person: Person) => (
                 <div
                   className="dropdown-item"
                   data-cy="suggestion-item"
-                  key={index}
+                  key={person.name}
                 >
                   <p
                     className="has-text-danger"
-                    onClick={() => handleSelectedPerson(person)}
+                    onMouseDown={() => handleSelectedPerson(person)}
                   >
                     {person.name}
                   </p>
