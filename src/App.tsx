@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import './App.scss';
 import { peopleFromServer } from './data/people';
 import { Person } from './types/Person';
@@ -17,11 +17,16 @@ export const App: React.FC = () => {
     person.name.toLowerCase().includes(appliedQuery.toLowerCase()),
   );
 
+  const debouncedApplyQuery = useMemo(
+    () => debounce((querys: string) => setAppliedQuery(querys), 1000),
+    [setAppliedQuery], // Додаємо залежності для debounce
+  );
+
   const applyQuery = useCallback(
-    debounce((querys: string) => {
-      setAppliedQuery(querys);
-    }, 1000),
-    [],
+    (querys: string) => {
+      debouncedApplyQuery(querys);
+    },
+    [debouncedApplyQuery],
   );
 
   React.useEffect(() => {
